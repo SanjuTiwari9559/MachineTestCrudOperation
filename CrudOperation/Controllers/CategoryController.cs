@@ -36,7 +36,8 @@ namespace CrudOperation.Controllers
         [ActionName("List")]
         public IActionResult List()
         {
-           var lists= dbcontext.Categories.ToList();
+            //var lists= dbcontext.Categories.ToList();
+            var lists = dbcontext.Categories.Where(x => x.CategoryId>10).ToList();
             return View(lists);
         }
         [HttpGet]
