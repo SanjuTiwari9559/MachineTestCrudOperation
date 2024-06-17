@@ -32,24 +32,28 @@ namespace TaskPractice.Services
             _dbContext.SaveChanges();
         }
 
-        public void Update(dto_UpdateCategory categoryDto)
+        public Category Update(dto_UpdateCategory categoryDto)
         {
-            var category = _dbContext.Categories.Find(categoryDto.Id);
+            var category = _dbContext.Categories.Find(categoryDto.CategoryId);
             if (category != null)
             {
                 category.CategoryName = categoryDto.CategoryName;
                 _dbContext.SaveChanges();
+                return category;
             }
+            return null;
         }
 
-        public void Delete(int id)
+        public Category Delete(int id)
         {
             var category = _dbContext.Categories.Find(id);
             if (category != null)
             {
                 _dbContext.Categories.Remove(category);
                 _dbContext.SaveChanges();
+                return category;
             }
+            return null;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace TaskPractice.Services
         IEnumerable<Category> GetAll();
         Category GetById(int id);
         void Add(dto_Category categoryDto);
-        void Update(dto_UpdateCategory categoryDto);
-        void Delete(int id);
+        Category Update(dto_UpdateCategory categoryDto);
+        Category Delete(int id);
     }
 }
