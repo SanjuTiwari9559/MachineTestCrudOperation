@@ -12,8 +12,8 @@ using TaskPractice.Data.Model;
 namespace TaskPractice.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240613103048_Initial")]
-    partial class Initial
+    [Migration("20240618105952_Initial Cat")]
+    partial class InitialCat
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,6 +62,31 @@ namespace TaskPractice.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("TaskPractice.Data.Model.User", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("TaskPractice.Data.Model.Product", b =>

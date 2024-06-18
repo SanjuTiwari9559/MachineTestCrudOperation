@@ -61,6 +61,31 @@ namespace TaskPractice.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("TaskPractice.Data.Model.User", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("TaskPractice.Data.Model.Product", b =>
                 {
                     b.HasOne("TaskPractice.Data.Model.Category", "Categorys")
