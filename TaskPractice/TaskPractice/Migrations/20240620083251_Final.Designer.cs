@@ -12,8 +12,8 @@ using TaskPractice.Data.Model;
 namespace TaskPractice.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240618105952_Initial Cat")]
-    partial class InitialCat
+    [Migration("20240620083251_Final")]
+    partial class Final
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,6 +64,27 @@ namespace TaskPractice.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("TaskPractice.Data.Model.Role", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("TaskPractice.Data.Model.User", b =>
                 {
                     b.Property<int>("id")
@@ -87,6 +108,25 @@ namespace TaskPractice.Migrations
                     b.HasKey("id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TaskPractice.Data.Model.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("TaskPractice.Data.Model.Product", b =>

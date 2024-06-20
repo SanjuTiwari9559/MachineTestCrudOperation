@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections;
 using TaskPractice.Data.dto;
@@ -36,8 +37,10 @@ namespace TaskPractice.Controllers
             }
             return Ok(existingCategory);
         }
+
         [HttpPost]
         [Route("AddCategory")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> AddCategory(dto_Category dto_Category)
         {
             await categoryAsync.AddAsync(dto_Category);

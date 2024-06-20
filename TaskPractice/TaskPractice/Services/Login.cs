@@ -7,6 +7,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Security.Authentication;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Data;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace TaskPractice.Services
 {
@@ -14,20 +19,79 @@ namespace TaskPractice.Services
     {
         private readonly ApplicationDbContext applicationDbContext;
 
-        public Login(ApplicationDbContext applicationDbContext)
+        public Login(ApplicationDbContext applicationDbContext, IConfiguration configuration)
         {
             this.applicationDbContext = applicationDbContext;
+            Configuration = configuration;
         }
-     /* public async Task<ActionResult> LoginAsync(string email, string password)
-        {
-           var user=  await AuthenticateUserAsync(email, password);
-            if(user == null)
-            {
 
+        public IConfiguration Configuration { get; }
+
+        public async Task<ActionResult> LoginAsync(string email, string password)
+        {
+            try
+            {
+                var user = await AuthenticateUserAsync(email, password);
+
+                if (user != null)
+                {
+                    var tokenString = GenerateToken(user);
+                    return new OkObjectResult(new { token = tokenString });
+                }
+
+                return new UnauthorizedObjectResult(new { message = "Unauthorized" });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here (actual logging not shown)
+                return new ObjectResult(new { message = "An error occurred while logging in", error = ex.Message })
+                {
+                    StatusCode = 500
+                };
             }
         }
-     */
-        [NonAction]
+        //{
+        //   var user=  await AuthenticateUserAsync(email, password);
+        //    if(user != null)
+        //    {
+        //        var tokenString = GenerateToken(user);
+        //        return new OkObjectResult(new { token = tokenString });
+        //    }
+        //}
+
+        private object GenerateToken(User user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim> {
+        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+        new Claim(JwtRegisteredClaimNames.Email, user.UserEmail),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique identifier for the token
+    };
+
+            // Add roles as claims
+            var userRoles = applicationDbContext.UserRoles.Where(u => u.UserId == user.id).ToList();
+            var roleIds = userRoles.Select(u => u.RoleId).ToList();
+            var roles = applicationDbContext.Roles.Where(r => roleIds.Contains(r.id)).ToList();
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Name)); // Use ClaimTypes.Role for role claims
+            }
+
+            var token = new JwtSecurityToken(
+                issuer: Configuration["Jwt:Issuer"],
+                audience: Configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(10),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+    
+
+    [NonAction]
         private async Task<User> AuthenticateUserAsync(string email, string password)
         {
 
@@ -86,5 +150,47 @@ namespace TaskPractice.Services
         {
             throw new NotImplementedException();
         }
+        public Role AddRole(dto_Role dto_role)
+        {
+            var role = new Role
+            {
+                Name = dto_role.Name,
+                RoleDescription = dto_role.RoleDescription
+
+            };
+             applicationDbContext.Roles.Add(role);
+            applicationDbContext.SaveChanges();
+            return role;
+        }
+        public bool AssignRoleToUser(dto_addUserRole obj)
+        {
+            try
+            {
+                var addRoles = new List<UserRole>();
+                var user = applicationDbContext.Users.SingleOrDefault(s => s.id == obj.UserId);
+                if (user == null)
+                {
+                    throw new Exception("User Not Valid");
+                }
+                foreach (int role in obj.RoleIds)
+                {
+                    var userRoles = new UserRole();
+                    userRoles.RoleId = role;
+                    userRoles.UserId = user.id;
+                    addRoles.Add(userRoles);
+
+                }
+                applicationDbContext.UserRoles.AddRange(addRoles);
+                applicationDbContext.SaveChanges();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+        }
+
     }
 }
